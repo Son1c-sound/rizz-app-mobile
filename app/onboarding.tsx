@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useRouter, Redirect } from 'expo-router';
@@ -99,8 +99,19 @@ export default function OnboardingPage() {
         </View>
       ) : (
         <View style={styles.content}>
-          <View>
+          <View style={styles.notificationContent}>
             <Text style={styles.title}>Enable Notifications</Text>
+            
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ 
+                  uri: 'https://static.vecteezy.com/system/resources/previews/009/847/894/non_2x/3d-set-of-bell-reminder-notification-alert-or-alarm-ecommerce-icon-for-application-website-ui-on-isolated-background-free-png.png'
+                }}
+                style={styles.notificationImage}
+                resizeMode="contain"
+              />
+            </View>
+
             <Text style={styles.description}>
               Get notified about new pickup lines and updates!
             </Text>
@@ -210,5 +221,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  notificationContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  imageContainer: {
+    width: 200,
+    height: 200,
+    marginVertical: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notificationImage: {
+    width: '100%',
+    height: '100%',
   },
 }); 

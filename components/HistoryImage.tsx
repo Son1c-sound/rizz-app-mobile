@@ -34,7 +34,10 @@ const IMAGE_HEIGHT = IMAGE_WIDTH * 1.6;
 export function HistoryImage({ id, url }: HistoryImageProps) {
   return (
     <Link href={`/image/${id}`} asChild>
-      <TouchableOpacity style={styles.historyImageContainer}>
+      <TouchableOpacity 
+        style={styles.historyImageContainer}
+        activeOpacity={0.9}
+      >
         <View style={styles.historyImage}>
           <Image 
             source={{ uri: url }} 
@@ -63,14 +66,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 24,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
     backgroundColor: '#fff',
   },
   imageStyle: {

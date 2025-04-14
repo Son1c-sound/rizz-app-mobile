@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 export function Navbar() {
   const router = useRouter();
@@ -42,7 +43,21 @@ export function Navbar() {
       <View style={styles.container}>
         {renderLeftButton()}
         
-        <Text style={styles.title}>RizzApp</Text>
+        <MaskedView
+          style={styles.titleContainer}
+          maskElement={
+            <View style={styles.titleMaskContainer}>
+              <Text style={styles.titleMask}>RizzApp</Text>
+            </View>
+          }
+        >
+          <LinearGradient
+            colors={['#FF69B4', '#FFB6C1']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.titleGradient}
+          />
+        </MaskedView>
 
         <TouchableOpacity style={styles.iconButton}>
           <LinearGradient
@@ -95,9 +110,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
+  titleContainer: {
+    height: 40,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleMaskContainer: {
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleMask: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    textAlign: 'center',
+    textShadowColor: '#000',
+    textShadowOffset: { width: -1, height: -1 },
+    textShadowRadius: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 1, height: 1 },
+        shadowOpacity: 1,
+        shadowRadius: 1,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
+  },
+  titleGradient: {
+    flex: 1,
+    width: '100%',
   },
 }); 
