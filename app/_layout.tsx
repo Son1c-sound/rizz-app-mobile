@@ -45,7 +45,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack 
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            animationDuration: 150,
+            contentStyle: {
+              backgroundColor: 'transparent',
+            },
+          }}
+        >
           <Stack.Screen name="index" />
           <Stack.Screen name="image/[id]" />
           <Stack.Screen name="profile" />
