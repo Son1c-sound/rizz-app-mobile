@@ -14,7 +14,6 @@ export default function ProfilePage() {
     <View style={styles.container}>
       <Navbar />
       <View style={styles.content}>
-        {/* Social Links */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Follow Us</Text>
           <View style={styles.socialContainer}>
@@ -30,8 +29,6 @@ export default function ProfilePage() {
             ))}
           </View>
         </View>
-
-        {/* Legal Links */}
         <View style={styles.legalButtons}>
           <Link href="/terms" asChild>
             <TouchableOpacity style={styles.legalButton}>

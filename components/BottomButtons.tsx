@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
+import { Link } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 const isSmallScreen = width < 375;
@@ -17,13 +17,15 @@ export function BottomButtons() {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.whiteButton}>
-          <View style={styles.whiteButtonInner}>
-            <Text style={styles.whiteButtonText} numberOfLines={1} adjustsFontSizeToFit>
-              Get Pickup Lines
-            </Text>
-          </View>
-        </TouchableOpacity>
+        <Link href="/pickup-lines" asChild>
+          <TouchableOpacity style={styles.whiteButton}>
+            <View style={styles.whiteButtonInner}>
+              <Text style={styles.whiteButtonText} numberOfLines={1} adjustsFontSizeToFit>
+                Get Pickup Lines
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
       </View>
       <TouchableOpacity style={styles.uploadButton}>
         <View style={styles.uploadButtonInner}>

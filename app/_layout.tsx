@@ -50,6 +50,7 @@ export default function RootLayout() {
           <Stack.Screen name="image/[id]" />
           <Stack.Screen name="profile" />
           <Stack.Screen name="onboarding" />
+          <Stack.Screen name="pickup-lines" />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
