@@ -5,12 +5,43 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+import * as ImagePicker from 'expo-image-picker';
 
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isMainPage = pathname === '/';
   const insets = useSafeAreaInsets();
+
+  const handleImageUpload = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        const newId = Date.now().toString();
+        router.push(`/image/${newId}?isNew=true`);
+        
+        if (result.assets[0].base64) {
+          router.setParams({ image: encodeURIComponent(result.assets[0].base64) });
+        }
+      }
+    } catch (err) {
+      alert('Failed to pick image. Please try again.');
+    }
+  };
 
   const renderLeftButton = () => {
     if (isMainPage) {
@@ -65,7 +96,10 @@ export function Navbar() {
           />
         </MaskedView>
 
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: 'transparent' }]}>
+        <TouchableOpacity 
+          style={[styles.iconButton, { backgroundColor: 'transparent' }]}
+          onPress={handleImageUpload}
+        >
           <LinearGradient
             colors={['#FF69B4', '#FFB6C1']}
             start={{ x: 0, y: 0 }}

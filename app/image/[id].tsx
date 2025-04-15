@@ -168,9 +168,13 @@ export default function ImageDetail() {
         <View style={styles.sectionHeader} />
 
         {isLoading && (
-          <Animated.View entering={FadeIn}>
-            <LoadingSkeleton />
-            <LoadingSkeleton />
+          <Animated.View entering={FadeIn} style={styles.card}>
+            <View style={[styles.cardContent, styles.loadingContent]}>
+              <Ionicons name="heart" size={24} color={CATEGORY_COLORS[selectedCategory].active} />
+              <Text style={[styles.flirtText, styles.loadingText]}>
+                Crafting the perfect rizz...
+              </Text>
+            </View>
           </Animated.View>
         )}
 
@@ -266,6 +270,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 24,
+    
   },
   categoryText: {
     fontSize: 14,
@@ -317,9 +322,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
     backgroundColor: 'transparent',
   },
   generateButton: {
@@ -373,5 +380,16 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginBottom: 16,
     paddingHorizontal: 4,
-  }
+  },
+  loadingContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 24,
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontWeight: '600',
+    color: '#666',
+  },
 }); 

@@ -13,14 +13,21 @@ interface BottomButtonsProps {
 export function BottomButtons({ onUpload }: BottomButtonsProps) {
   return (
     <View style={styles.bottomButtons}>
-      <View style={styles.topRow}>
-        <TouchableOpacity style={styles.whiteButton}>
-          <View style={styles.whiteButtonInner}>
-            <Text style={styles.whiteButtonText} numberOfLines={1} adjustsFontSizeToFit>
-              Rate my tinder
-            </Text>
-          </View>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.uploadButton} onPress={onUpload}>
+        <View style={styles.uploadButtonInner}>
+          <Text style={styles.uploadButtonText}>Upload a Screenshot</Text>
+        </View>
+      </TouchableOpacity>
+      <View style={styles.bottomRow}>
+        <Link href="/rate-profile" asChild>
+          <TouchableOpacity style={styles.whiteButton}>
+            <View style={styles.whiteButtonInner}>
+              <Text style={styles.whiteButtonText} numberOfLines={1} adjustsFontSizeToFit>
+                Rate my tinder
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
         <Link href="/pickup-lines" asChild>
           <TouchableOpacity style={styles.whiteButton}>
             <View style={styles.whiteButtonInner}>
@@ -31,11 +38,6 @@ export function BottomButtons({ onUpload }: BottomButtonsProps) {
           </TouchableOpacity>
         </Link>
       </View>
-      <TouchableOpacity style={styles.uploadButton} onPress={onUpload}>
-        <View style={styles.uploadButtonInner}>
-          <Text style={styles.uploadButtonText}>Upload a Screenshot</Text>
-        </View>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -43,25 +45,25 @@ export function BottomButtons({ onUpload }: BottomButtonsProps) {
 const styles = StyleSheet.create({
   bottomButtons: {
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
-  topRow: {
+  bottomRow: {
     flexDirection: 'row',
     gap: 12,
   },
   whiteButton: {
     flex: 1,
-    borderRadius: 24,
+    borderRadius: 20,
     backgroundColor: '#fff',
     overflow: 'hidden',
   },
   whiteButtonInner: {
-    padding: isSmallScreen ? 10 : 13,
+    padding: isSmallScreen ? 8 : 10,
     alignItems: 'center',
   },
   whiteButtonText: {
     color: '#333',
-    fontSize: isSmallScreen ? 14 : 16,
+    fontSize: isSmallScreen ? 13 : 15,
     fontWeight: '600',
     textAlign: 'center',
   },
