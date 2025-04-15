@@ -13,7 +13,7 @@ export function BottomButtons() {
         <TouchableOpacity style={styles.whiteButton}>
           <View style={styles.whiteButtonInner}>
             <Text style={styles.whiteButtonText} numberOfLines={1} adjustsFontSizeToFit>
-              AI Wingman
+              Rate my tinder
             </Text>
           </View>
         </TouchableOpacity>
