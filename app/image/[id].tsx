@@ -54,7 +54,6 @@ export default function ImageDetail() {
   const { generateFlirt, saveFlirt, getSavedFlirts, isLoading, error } = useFlirtAI();
   const [selectedCategory, setSelectedCategory] = useState<FlirtCategory>('standard');
   const [savedFlirtData, setSavedFlirtData] = useState<SavedFlirt | null>(null);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const categories: { id: FlirtCategory; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { id: 'standard', label: 'Standard', icon: 'heart-outline' },
@@ -62,24 +61,20 @@ export default function ImageDetail() {
     { id: 'spicy', label: 'Spicy', icon: 'flame-outline' },
   ];
 
-  // Load saved data or handle new image
   useEffect(() => {
     const initializeImage = async () => {
       if (isNew === 'true') {
         if (image) {
-          // For new uploads with image already available
           const decodedImage = decodeURIComponent(image as string);
           handleGenerateFlirt(decodedImage);
         }
-        // If no image yet, wait for setParams to update it
       } else {
-        // For existing images, load saved data
         await loadSavedFlirtData();
       }
     };
 
     initializeImage();
-  }, [image, isNew]); // Add image as dependency to react to setParams updates
+  }, [image, isNew]);
 
   const loadSavedFlirtData = async () => {
     try {
@@ -92,7 +87,6 @@ export default function ImageDetail() {
         }
       }
     } catch (err) {
-      // Error will be handled by useFlirtAI hook
     }
   };
 
@@ -103,19 +97,14 @@ export default function ImageDetail() {
     const response = await generateFlirt(imageToUse, selectedCategory);
     if (response) {
       await saveFlirt(id as string, imageToUse, response);
-      await loadSavedFlirtData(); // Reload to show new flirt
+      await loadSavedFlirtData();
     }
   };
 
-  const handleCopy = async (flirt: FlirtResponse, index: number) => {
+  const handleCopy = async (flirt: FlirtResponse) => {
     await Clipboard.setString(flirt.flirtResponse);
-    setCopiedIndex(index);
-    setTimeout(() => {
-      setCopiedIndex(null);
-    }, 2000);
   };
 
-  // Get the image source for display
   const getImageSource = () => {
     if (savedFlirtData) {
       return { uri: `data:image/jpeg;base64,${savedFlirtData.image}` };
@@ -133,6 +122,7 @@ export default function ImageDetail() {
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.categories}>
           {categories.map((category) => (
@@ -143,8 +133,7 @@ export default function ImageDetail() {
                 {
                   backgroundColor: selectedCategory === category.id 
                     ? CATEGORY_COLORS[category.id].active 
-                    : CATEGORY_COLORS[category.id].inactive,
-                  borderColor: CATEGORY_COLORS[category.id].border,
+                    : CATEGORY_COLORS[category.id].inactive
                 }
               ]}
               onPress={() => setSelectedCategory(category.id)}
@@ -176,24 +165,25 @@ export default function ImageDetail() {
           />
         )}
 
-        <View style={styles.sectionHeader}>
-        </View>
+        <View style={styles.sectionHeader} />
 
         {isLoading && (
-          <>
+          <Animated.View entering={FadeIn}>
             <LoadingSkeleton />
             <LoadingSkeleton />
-          </>
+          </Animated.View>
         )}
+
         {error && (
-          <View style={styles.card}>
+          <Animated.View entering={FadeIn} style={styles.card}>
             <View style={styles.errorCard}>
               <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
               <Text style={styles.errorText}>{error}</Text>
             </View>
-          </View>
+          </Animated.View>
         )}
-        {savedFlirtData?.flirts.map((flirt, index) => (
+
+        {savedFlirtData?.flirts.map((flirt, index) => 
           flirt.flirtResponse && (
             <Animated.View 
               key={flirt.timestamp} 
@@ -203,28 +193,15 @@ export default function ImageDetail() {
               <View style={styles.cardContent}>
                 <Text style={styles.flirtText}>{flirt.flirtResponse}</Text>
                 <TouchableOpacity 
-                  onPress={() => handleCopy(flirt, index)} 
+                  onPress={() => handleCopy(flirt)} 
                   style={styles.copyButton}
                 >
-                  {copiedIndex === index ? (
-                    <Animated.View 
-                      style={styles.copiedContainer}
-                      entering={FadeIn.duration(200)}
-                      exiting={FadeOut.duration(200)}
-                    >
-                      <Ionicons name="checkmark" size={18} color={CATEGORY_COLORS[flirt.category].active} />
-                      <Text style={[styles.copiedText, {
-                        color: CATEGORY_COLORS[flirt.category].active
-                      }]}>Copied!</Text>
-                    </Animated.View>
-                  ) : (
-                    <Ionicons name="copy-outline" size={20} color={CATEGORY_COLORS[flirt.category].active} />
-                  )}
+                  <Ionicons name="copy-outline" size={20} color={CATEGORY_COLORS[flirt.category].active} />
                 </TouchableOpacity>
               </View>
             </Animated.View>
           )
-        ))}
+        )}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
@@ -251,20 +228,14 @@ export default function ImageDetail() {
 const CATEGORY_COLORS = {
   standard: {
     active: '#4A90E2',
-    text: '#fff',
-    border: '#4A90E2',
     inactive: '#EDF5FF'
   },
   playful: {
     active: '#9C27B0',
-    text: '#fff',
-    border: '#9C27B0',
     inactive: '#F8E7FB'
   },
   spicy: {
     active: '#E53935',
-    text: '#fff',
-    border: '#E53935',
     inactive: '#FFEBEE'
   }
 };
@@ -272,7 +243,6 @@ const CATEGORY_COLORS = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   scrollView: {
     flex: 1,
@@ -296,7 +266,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 24,
-    borderWidth: 1,
   },
   categoryText: {
     fontSize: 14,
@@ -311,7 +280,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 24,
     marginBottom: 12,
-    borderWidth: 0,
   },
   cardContent: {
     padding: 20,
@@ -352,6 +320,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+    backgroundColor: 'transparent',
   },
   generateButton: {
     borderRadius: 24,
@@ -372,7 +341,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   bottomSpacing: {
-    height: 100, // Extra space at the bottom
+    height: 100,
   },
   skeletonContent: {
     width: '100%',
@@ -404,17 +373,5 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginBottom: 16,
     paddingHorizontal: 4,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
-  },
-  divider: {
-    height: 2,
-    backgroundColor: '#E0E0E0',
-    width: '100%',
-    borderRadius: 1,
-  },
+  }
 }); 

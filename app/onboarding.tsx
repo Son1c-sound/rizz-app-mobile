@@ -55,84 +55,92 @@ export default function OnboardingPage() {
     }
   }
 
+  function renderGenderSelection() {
+    return (
+      <View style={styles.content}>
+        <View>
+          <Text style={styles.title}>Welcome to RizzApp</Text>
+          <Text style={styles.question}>What's your gender?</Text>
+          <View style={styles.options}>
+            <TouchableOpacity 
+              style={[styles.option, gender === 'male' && styles.selectedOption]}
+              onPress={() => setGender('male')}
+            >
+              <Text style={[styles.optionText, gender === 'male' && styles.selectedText]}>
+                Male
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.option, gender === 'female' && styles.selectedOption]}
+              onPress={() => setGender('female')}
+            >
+              <Text style={[styles.optionText, gender === 'female' && styles.selectedText]}>
+                Female
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.buttons}>
+          <TouchableOpacity 
+            style={styles.skipButton} 
+            onPress={() => setStep(2)}
+          >
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.nextButton, gender && styles.nextButtonActive]}
+            onPress={() => setStep(2)}
+          >
+            <Text style={styles.nextButtonText}>Next</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  function renderNotifications() {
+    return (
+      <View style={styles.content}>
+        <View style={styles.notificationContent}>
+          <Text style={styles.title}>Enable Notifications</Text>
+          
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ 
+                uri: 'https://static.vecteezy.com/system/resources/previews/009/847/894/non_2x/3d-set-of-bell-reminder-notification-alert-or-alarm-ecommerce-icon-for-application-website-ui-on-isolated-background-free-png.png'
+              }}
+              style={styles.notificationImage}
+              resizeMode="contain"
+            />
+          </View>
+
+          <Text style={styles.description}>
+            Get notified about new pickup lines and updates!
+          </Text>
+        </View>
+
+        <View style={styles.buttons}>
+          <TouchableOpacity 
+            style={styles.skipButton} 
+            onPress={completeOnboarding}
+          >
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.nextButton}
+            onPress={handleNotificationPermission}
+          >
+            <Text style={styles.nextButtonText}>Enable</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {step === 1 ? (
-        <View style={styles.content}>
-          <View>
-            <Text style={styles.title}>Welcome to RizzApp</Text>
-            <Text style={styles.question}>What's your gender?</Text>
-            <View style={styles.options}>
-              <TouchableOpacity 
-                style={[styles.option, gender === 'male' && styles.selectedOption]}
-                onPress={() => setGender('male')}
-              >
-                <Text style={[styles.optionText, gender === 'male' && styles.selectedText]}>
-                  Male
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.option, gender === 'female' && styles.selectedOption]}
-                onPress={() => setGender('female')}
-              >
-                <Text style={[styles.optionText, gender === 'female' && styles.selectedText]}>
-                  Female
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.buttons}>
-            <TouchableOpacity 
-              style={styles.skipButton} 
-              onPress={() => setStep(2)}
-            >
-              <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.nextButton, gender && styles.nextButtonActive]}
-              onPress={() => setStep(2)}
-            >
-              <Text style={styles.nextButtonText}>Next</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.content}>
-          <View style={styles.notificationContent}>
-            <Text style={styles.title}>Enable Notifications</Text>
-            
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ 
-                  uri: 'https://static.vecteezy.com/system/resources/previews/009/847/894/non_2x/3d-set-of-bell-reminder-notification-alert-or-alarm-ecommerce-icon-for-application-website-ui-on-isolated-background-free-png.png'
-                }}
-                style={styles.notificationImage}
-                resizeMode="contain"
-              />
-            </View>
-
-            <Text style={styles.description}>
-              Get notified about new pickup lines and updates!
-            </Text>
-          </View>
-
-          <View style={styles.buttons}>
-            <TouchableOpacity 
-              style={styles.skipButton} 
-              onPress={completeOnboarding}
-            >
-              <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.nextButton}
-              onPress={handleNotificationPermission}
-            >
-              <Text style={styles.nextButtonText}>Enable</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      {step === 1 ? renderGenderSelection() : renderNotifications()}
     </SafeAreaView>
   );
 }
@@ -175,11 +183,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#fff',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
   },
   selectedOption: {
-    borderColor: '#000',
     backgroundColor: '#000',
   },
   optionText: {

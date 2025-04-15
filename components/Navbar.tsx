@@ -39,12 +39,18 @@ export function Navbar() {
   };
 
   return (
-    <View style={{ paddingTop: Platform.OS === 'ios' ? insets.top : insets.top + 8 }}>
+    <View style={[
+      styles.wrapper,
+      { 
+        paddingTop: Platform.OS === 'ios' ? insets.top : insets.top + 8,
+        backgroundColor: 'transparent'
+      }
+    ]}>
       <View style={styles.container}>
         {renderLeftButton()}
         
         <MaskedView
-          style={styles.titleContainer}
+          style={[styles.titleContainer, { backgroundColor: 'transparent' }]}
           maskElement={
             <View style={styles.titleMaskContainer}>
               <Text style={styles.titleMask}>RizzApp</Text>
@@ -59,7 +65,7 @@ export function Navbar() {
           />
         </MaskedView>
 
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={[styles.iconButton, { backgroundColor: 'transparent' }]}>
           <LinearGradient
             colors={['#FF69B4', '#FFB6C1']}
             start={{ x: 0, y: 0 }}
@@ -75,6 +81,9 @@ export function Navbar() {
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    backgroundColor: 'transparent',
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -82,6 +91,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     minHeight: 60,
+    backgroundColor: 'transparent',
   },
   iconButton: {
     width: 44,

@@ -31,12 +31,10 @@ export default function HomePage() {
     await loadSavedFlirts();
   };
 
-  // Load flirts when the component mounts
   useEffect(() => {
     loadSavedFlirts();
   }, []);
 
-  // Reload flirts when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadSavedFlirts();
@@ -52,7 +50,6 @@ export default function HomePage() {
         return;
       }
 
-      // Launch image picker with minimal processing
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -63,10 +60,8 @@ export default function HomePage() {
 
       if (!result.canceled) {
         const newId = Date.now().toString();
-        // Navigate immediately, even before base64 is ready
         router.push(`/image/${newId}?isNew=true`);
         
-        // Process image after navigation has started
         if (result.assets[0].base64) {
           router.setParams({ image: encodeURIComponent(result.assets[0].base64) });
         }
@@ -74,12 +69,6 @@ export default function HomePage() {
     } catch (err) {
       alert('Failed to pick image. Please try again.');
     }
-  };
-
-  const handleResetOnboarding = async () => {
-    await AsyncStorage.removeItem('onboardingCompleted');
-    await AsyncStorage.removeItem('userGender');
-    router.replace('/onboarding');
   };
 
   return (
@@ -127,4 +116,4 @@ const styles = StyleSheet.create({
     marginHorizontal: -4,
     marginTop: 8,
   },
-}); 
+});
