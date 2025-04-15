@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import { Link } from 'expo-router';
+import { GestureResponderEvent } from 'react-native';
 
 export const HISTORY_IMAGES = [
   {
@@ -22,8 +23,9 @@ export const HISTORY_IMAGES = [
 ];
 
 interface HistoryImageProps {
-  id: number;
+  id: string;
   url: string;
+  onDelete: (id: string) => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -31,7 +33,12 @@ const GRID_SPACING = 8;
 const IMAGE_WIDTH = (width - 32 - (GRID_SPACING * 2)) / 3;
 const IMAGE_HEIGHT = IMAGE_WIDTH * 1.6;
 
-export function HistoryImage({ id, url }: HistoryImageProps) {
+export function HistoryImage({ id, url, onDelete }: HistoryImageProps) {
+  const handleDelete = (e: GestureResponderEvent) => {
+    e.preventDefault(); // Prevent navigation when clicking delete
+    onDelete(id);
+  };
+
   return (
     <Link href={`/image/${id}`} asChild>
       <TouchableOpacity 
@@ -40,11 +47,14 @@ export function HistoryImage({ id, url }: HistoryImageProps) {
       >
         <View style={styles.historyImage}>
           <Image 
-            source={{ uri: url }} 
+            source={{ uri: `data:image/jpeg;base64,${url}` }}
             style={styles.imageStyle}
             resizeMode="cover"
           />
-          <TouchableOpacity style={styles.deleteButton}>
+          <TouchableOpacity 
+            style={styles.deleteButton} 
+            onPress={handleDelete}
+          >
             <Text style={styles.deleteX}>✕</Text>
           </TouchableOpacity>
         </View>

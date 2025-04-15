@@ -1,117 +1,166 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Image, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Clipboard } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { HISTORY_IMAGES } from '../../components/HistoryImage';
-import { Button } from '../../components/Button';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Clipboard, ScrollView } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Navbar } from '../../components/Navbar';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFlirtAI, FlirtCategory, SavedFlirt, FlirtResponse } from '../../hooks/useFlirtAI';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { 
+  useAnimatedStyle, 
+  withRepeat, 
+  withSequence, 
+  withTiming,
+  FadeIn,
+  FadeOut,
+  FadeInUp,
+  useSharedValue
+} from 'react-native-reanimated';
+
+const LoadingSkeleton = () => {
+  const opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 1000 }),
+        withTiming(0.3, { duration: 1000 })
+      ),
+      -1
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value
+  }));
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardContent}>
+        <Animated.View style={[styles.skeletonContent, animatedStyle]}>
+          <View style={styles.skeletonLine} />
+          <View style={styles.skeletonLine} />
+          <View style={[styles.skeletonLine, { width: '60%' }]} />
+        </Animated.View>
+        <View style={styles.skeletonIcon} />
+      </View>
+    </View>
+  );
+};
 
 export default function ImageDetail() {
-  const { id } = useLocalSearchParams();
-  const image:any = HISTORY_IMAGES.find(img => img.id === Number(id));
-  const scrollViewRef = useRef(null);
-  const [selectedCategory, setSelectedCategory] = useState('standard');
+  const { id, image, isNew } = useLocalSearchParams();
+  const router = useRouter();
+  const { generateFlirt, saveFlirt, getSavedFlirts, isLoading, error } = useFlirtAI();
+  const [selectedCategory, setSelectedCategory] = useState<FlirtCategory>('standard');
+  const [savedFlirtData, setSavedFlirtData] = useState<SavedFlirt | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const categories = [
-    { id: 'standard', label: 'Standard' },
-    { id: 'playful', label: 'Playful' },
-    { id: 'spicy', label: 'Spicy' }
+  const categories: { id: FlirtCategory; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+    { id: 'standard', label: 'Standard', icon: 'heart-outline' },
+    { id: 'playful', label: 'Playful', icon: 'happy-outline' },
+    { id: 'spicy', label: 'Spicy', icon: 'flame-outline' },
   ];
 
-  const pickupLines = [
-    "Are you French? Because Eiffel for you!",
-    "Are you a magician? Because whenever I look at you, everyone else disappears!",
-    "Do you have a map? I keep getting lost in your eyes!",
-      "Do you have a map? I keep getting lost in your eyes!",
-        "Do you have a map? I keep getting lost in your eyes!",
-    
-  ];
+  // Load saved data or handle new image
+  useEffect(() => {
+    const initializeImage = async () => {
+      if (isNew === 'true') {
+        if (image) {
+          // For new uploads with image already available
+          const decodedImage = decodeURIComponent(image as string);
+          handleGenerateFlirt(decodedImage);
+        }
+        // If no image yet, wait for setParams to update it
+      } else {
+        // For existing images, load saved data
+        await loadSavedFlirtData();
+      }
+    };
 
-  const getButtonText = () => {
-    switch(selectedCategory) {
-      case 'standard':
-        return 'Get Standard Rizz';
-      case 'playful':
-        return 'Get Playful Rizz';
-      case 'spicy':
-        return 'Get Spicy Rizz';
-      default:
-        return 'Get More';
+    initializeImage();
+  }, [image, isNew]); // Add image as dependency to react to setParams updates
+
+  const loadSavedFlirtData = async () => {
+    try {
+      const savedFlirts = await getSavedFlirts();
+      const flirtData = savedFlirts.find(flirt => flirt.id === id);
+      if (flirtData) {
+        setSavedFlirtData(flirtData);
+        if (flirtData.flirts.length > 0) {
+          setSelectedCategory(flirtData.flirts[0].category);
+        }
+      }
+    } catch (err) {
+      // Error will be handled by useFlirtAI hook
     }
   };
 
-  const handleCopy = async (text: string, index: number) => {
-    await Clipboard.setString(text);
+  const handleGenerateFlirt = async (initialImage?: string) => {
+    const imageToUse = initialImage || savedFlirtData?.image || (image ? decodeURIComponent(image as string) : null);
+    if (!imageToUse) return;
+    
+    const response = await generateFlirt(imageToUse, selectedCategory);
+    if (response) {
+      await saveFlirt(id as string, imageToUse, response);
+      await loadSavedFlirtData(); // Reload to show new flirt
+    }
+  };
+
+  const handleCopy = async (flirt: FlirtResponse, index: number) => {
+    await Clipboard.setString(flirt.flirtResponse);
     setCopiedIndex(index);
     setTimeout(() => {
       setCopiedIndex(null);
     }, 2000);
   };
 
+  // Get the image source for display
+  const getImageSource = () => {
+    if (savedFlirtData) {
+      return { uri: `data:image/jpeg;base64,${savedFlirtData.image}` };
+    } else if (image) {
+      return { uri: `data:image/jpeg;base64,${decodeURIComponent(image as string)}` };
+    }
+    return null;
+  };
+
+  const imageSource = getImageSource();
+
   return (
-    <View style={styles.mainContainer}>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       <Navbar />
-      
       <ScrollView 
-        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
-        <LinearGradient
-          colors={['#f8f9fa', '#e9ecef']}
-          style={styles.wrapper}
-        >
-          <View style={styles.container}>
-            <Image
-              source={{ uri: image.image }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            
-            <View style={styles.cardsContainer}>
-              {pickupLines.map((line, index) => (
-                <View key={index} style={styles.card}>
-                  <Text style={styles.pickupLineText}>{line}</Text>
-                  
-                  <TouchableOpacity 
-                    style={styles.copyButton}
-                    onPress={() => handleCopy(line, index)}
-                  >
-                    {copiedIndex === index ? (
-                      <View style={styles.copiedContainer}>
-                        <Ionicons name="checkmark" size={20} color="#4CAF50" />
-                        <Text style={styles.copiedText}>Copied!</Text>
-                      </View>
-                    ) : (
-                      <Ionicons name="copy-outline" size={20} color="#666" />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </View>
-        </LinearGradient>
-      </ScrollView>
-
-      <LinearGradient
-        colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.9)', '#ffffff']}
-        style={styles.bottomContainer}
-      >
-        <View style={styles.categoryBadges}>
+        <View style={styles.categories}>
           {categories.map((category) => (
             <TouchableOpacity
               key={category.id}
               style={[
-                styles.categoryBadge,
-                selectedCategory === category.id && styles.categoryBadgeSelected
+                styles.categoryButton,
+                {
+                  backgroundColor: selectedCategory === category.id 
+                    ? CATEGORY_COLORS[category.id].active 
+                    : CATEGORY_COLORS[category.id].inactive,
+                  borderColor: CATEGORY_COLORS[category.id].border,
+                }
               ]}
               onPress={() => setSelectedCategory(category.id)}
             >
+              <Ionicons 
+                name={category.icon} 
+                size={20} 
+                color={selectedCategory === category.id ? '#fff' : CATEGORY_COLORS[category.id].active} 
+              />
               <Text style={[
-                styles.categoryBadgeText,
-                selectedCategory === category.id && styles.categoryBadgeTextSelected
+                styles.categoryText,
+                { 
+                  color: selectedCategory === category.id 
+                    ? '#fff' 
+                    : CATEGORY_COLORS[category.id].active
+                }
               ]}>
                 {category.label}
               </Text>
@@ -119,19 +168,109 @@ export default function ImageDetail() {
           ))}
         </View>
 
-        <Button variant="black" style={styles.generateButton}>
-          {getButtonText()}
-        </Button>
-      </LinearGradient>
-    </View>
+        {imageSource && (
+          <Image 
+            source={imageSource}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        )}
+
+        <View style={styles.sectionHeader}>
+        </View>
+
+        {isLoading && (
+          <>
+            <LoadingSkeleton />
+            <LoadingSkeleton />
+          </>
+        )}
+        {error && (
+          <View style={styles.card}>
+            <View style={styles.errorCard}>
+              <Ionicons name="alert-circle-outline" size={24} color="#E53935" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          </View>
+        )}
+        {savedFlirtData?.flirts.map((flirt, index) => (
+          flirt.flirtResponse && (
+            <Animated.View 
+              key={flirt.timestamp} 
+              entering={FadeInUp.duration(300).delay(index * 100)}
+              style={styles.card}
+            >
+              <View style={styles.cardContent}>
+                <Text style={styles.flirtText}>{flirt.flirtResponse}</Text>
+                <TouchableOpacity 
+                  onPress={() => handleCopy(flirt, index)} 
+                  style={styles.copyButton}
+                >
+                  {copiedIndex === index ? (
+                    <Animated.View 
+                      style={styles.copiedContainer}
+                      entering={FadeIn.duration(200)}
+                      exiting={FadeOut.duration(200)}
+                    >
+                      <Ionicons name="checkmark" size={18} color={CATEGORY_COLORS[flirt.category].active} />
+                      <Text style={[styles.copiedText, {
+                        color: CATEGORY_COLORS[flirt.category].active
+                      }]}>Copied!</Text>
+                    </Animated.View>
+                  ) : (
+                    <Ionicons name="copy-outline" size={20} color={CATEGORY_COLORS[flirt.category].active} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          )
+        ))}
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
+
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={[styles.generateButton, {
+            backgroundColor: CATEGORY_COLORS[selectedCategory].active
+          }]}
+          onPress={() => handleGenerateFlirt()}
+          disabled={isLoading}
+        >
+          <View style={styles.buttonInner}>
+            <Ionicons name="refresh" size={24} color="#fff" style={styles.buttonIcon} />
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Generating...' : `Generate ${selectedCategory} Line`}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const { width } = Dimensions.get('window');
-const IMAGE_SIZE = width * 0.6;
+const CATEGORY_COLORS = {
+  standard: {
+    active: '#4A90E2',
+    text: '#fff',
+    border: '#4A90E2',
+    inactive: '#EDF5FF'
+  },
+  playful: {
+    active: '#9C27B0',
+    text: '#fff',
+    border: '#9C27B0',
+    inactive: '#F8E7FB'
+  },
+  spicy: {
+    active: '#E53935',
+    text: '#fff',
+    border: '#E53935',
+    inactive: '#FFEBEE'
+  }
+};
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
@@ -139,49 +278,66 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 120, 
-  
+    padding: 16,
+    paddingBottom: 100,
   },
-  wrapper: {
-    flex: 1,
-    
+  categories: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 4,
+    marginBottom: 24,
   },
-  container: {
+  categoryButton: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   image: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    alignSelf: 'center',
-    marginTop: 20,
+    width: '100%',
+    height: 300,
     borderRadius: 24,
-  },
-  cardsContainer: {
-    padding: 16,
-    gap: 12,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderRadius: 24,
+    marginBottom: 12,
+    borderWidth: 0,
   },
-  pickupLineText: {
+  cardContent: {
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  flirtText: {
     flex: 1,
     fontSize: 16,
     color: '#333',
+    lineHeight: 24,
     marginRight: 12,
-    textAlign: 'left',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#E53935',
+    textAlign: 'center',
+  },
+  placeholderText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
   copyButton: {
     padding: 4,
-    minWidth: 60,
-    alignItems: 'center',
   },
   copiedContainer: {
     flexDirection: 'row',
@@ -190,44 +346,75 @@ const styles = StyleSheet.create({
   },
   copiedText: {
     fontSize: 12,
-    color: '#4CAF50',
     fontWeight: '500',
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 16,
-    paddingTop: 32, // Increased top padding for gradient effect
-    gap: 12,
-  },
-  categoryBadges: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  categoryBadge: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.8)', // Semi-transparent background
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  categoryBadgeSelected: {
-    backgroundColor: '#000',
-    borderColor: '#000',
-  },
-  categoryBadgeText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  categoryBadgeTextSelected: {
-    color: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   generateButton: {
+    borderRadius: 24,
+  },
+  buttonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    gap: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  bottomSpacing: {
+    height: 100, // Extra space at the bottom
+  },
+  skeletonContent: {
     width: '100%',
+  },
+  skeletonLine: {
+    height: 16,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  skeletonIcon: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 10,
+  },
+  errorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+  },
+  cardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: '#E0E0E0',
+    width: '100%',
+    borderRadius: 1,
   },
 }); 

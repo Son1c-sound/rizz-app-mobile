@@ -6,7 +6,11 @@ import { Link } from 'expo-router';
 const { width } = Dimensions.get('window');
 const isSmallScreen = width < 375;
 
-export function BottomButtons() {
+interface BottomButtonsProps {
+  onUpload: () => void;
+}
+
+export function BottomButtons({ onUpload }: BottomButtonsProps) {
   return (
     <View style={styles.bottomButtons}>
       <View style={styles.topRow}>
@@ -27,7 +31,7 @@ export function BottomButtons() {
           </TouchableOpacity>
         </Link>
       </View>
-      <TouchableOpacity style={styles.uploadButton}>
+      <TouchableOpacity style={styles.uploadButton} onPress={onUpload}>
         <View style={styles.uploadButtonInner}>
           <Text style={styles.uploadButtonText}>Upload a Screenshot</Text>
         </View>
