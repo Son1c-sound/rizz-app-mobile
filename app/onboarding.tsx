@@ -1,146 +1,119 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
-import { useRouter, Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSuperwall } from '../hooks/useSuperWall';
+import { SUPERWALL_TRIGGERS } from './config/superwall';
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState(1);
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const router = useRouter();
+  const { isSubscribed, showPaywall } = useSuperwall();
 
   useEffect(() => {
     checkOnboardingStatus();
-  }, []);
+  }, [isSubscribed]);
 
   async function checkOnboardingStatus() {
     try {
       const completed = await AsyncStorage.getItem('onboardingCompleted');
       if (completed === 'true') {
-        router.replace('/');
+        if (isSubscribed) {
+          router.replace('/');
+        } else {
+          await showPaywall(SUPERWALL_TRIGGERS.FEATURE_UNLOCK);
+          await AsyncStorage.removeItem('onboardingCompleted');
+        }
       }
     } catch (error) {
       console.log('Error checking onboarding status:', error);
     }
   }
 
-  async function handleNotificationPermission() {
-    try {
-      if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
-      }
-      completeOnboarding();
-    } catch (error) {
-      console.log('Error handling notifications:', error);
-      completeOnboarding();
-    }
-  }
-
   async function completeOnboarding() {
     try {
-      await AsyncStorage.setItem('onboardingCompleted', 'true');
       if (gender) {
         await AsyncStorage.setItem('userGender', gender);
       }
-      router.replace('/');
+      
+      await showPaywall(SUPERWALL_TRIGGERS.FEATURE_UNLOCK);
+      
+      if (isSubscribed) {
+        await AsyncStorage.setItem('onboardingCompleted', 'true');
+        router.replace('/');
+      }
     } catch (error) {
       console.log('Error completing onboarding:', error);
     }
   }
 
-  function renderGenderSelection() {
-    return (
+  return (
+    <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View>
-          <Text style={styles.title}>Welcome to RizzApp</Text>
+        <View style={styles.centerContent}>
+          <Text style={styles.title}>Welcome to RizzUP</Text>
           <Text style={styles.question}>What's your gender?</Text>
           <View style={styles.options}>
             <TouchableOpacity 
-              style={[styles.option, gender === 'male' && styles.selectedOption]}
               onPress={() => setGender('male')}
             >
-              <Text style={[styles.optionText, gender === 'male' && styles.selectedText]}>
-                Male
-              </Text>
+              <LinearGradient
+                colors={['#FF4D43', '#FF2D55']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.optionBorder, gender === 'male' && styles.selectedOptionBorder]}
+              >
+                <View style={[styles.option, gender === 'male' && styles.selectedOption]}>
+                  <Text style={[styles.optionText, gender === 'male' && styles.selectedText]}>
+                    Male
+                  </Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
+
             <TouchableOpacity 
-              style={[styles.option, gender === 'female' && styles.selectedOption]}
               onPress={() => setGender('female')}
             >
-              <Text style={[styles.optionText, gender === 'female' && styles.selectedText]}>
-                Female
-              </Text>
+              <LinearGradient
+                colors={['#FF4D43', '#FF2D55']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.optionBorder, gender === 'female' && styles.selectedOptionBorder]}
+              >
+                <View style={[styles.option, gender === 'female' && styles.selectedOption]}>
+                  <Text style={[styles.optionText, gender === 'female' && styles.selectedText]}>
+                    Female
+                  </Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.buttons}>
           <TouchableOpacity 
-            style={styles.skipButton} 
-            onPress={() => setStep(2)}
-          >
-            <Text style={styles.skipText}>Skip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
             style={[styles.nextButton, gender && styles.nextButtonActive]}
-            onPress={() => setStep(2)}
+            onPress={completeOnboarding}
           >
-            <Text style={styles.nextButtonText}>Next</Text>
+            <LinearGradient
+              colors={['#FF4D43', '#FF2D55']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.buttonInner}
+            >
+              <Text style={styles.nextButtonText}>Continue</Text>
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  function renderNotifications() {
-    return (
-      <View style={styles.content}>
-        <View style={styles.notificationContent}>
-          <Text style={styles.title}>Enable Notifications</Text>
-          
-          <View style={styles.imageContainer}>
-            <Image
-              source={{ 
-                uri: 'https://static.vecteezy.com/system/resources/previews/009/847/894/non_2x/3d-set-of-bell-reminder-notification-alert-or-alarm-ecommerce-icon-for-application-website-ui-on-isolated-background-free-png.png'
-              }}
-              style={styles.notificationImage}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={styles.description}>
-            Get notified about new pickup lines and updates!
-          </Text>
-        </View>
-
-        <View style={styles.buttons}>
           <TouchableOpacity 
             style={styles.skipButton} 
             onPress={completeOnboarding}
           >
             <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.nextButton}
-            onPress={handleNotificationPermission}
-          >
-            <Text style={styles.nextButtonText}>Enable</Text>
-          </TouchableOpacity>
         </View>
       </View>
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {step === 1 ? renderGenderSelection() : renderNotifications()}
     </SafeAreaView>
   );
 }
@@ -148,64 +121,66 @@ export default function OnboardingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#000',
   },
   content: {
     flex: 1,
     padding: 24,
     justifyContent: 'space-between',
+    backgroundColor: '#000',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#333',
+    color: '#fff',
     marginBottom: 32,
     textAlign: 'center',
   },
   question: {
     fontSize: 20,
-    color: '#333',
+    color: '#fff',
     marginBottom: 32,
     textAlign: 'center',
   },
-  description: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
   options: {
+    width: '100%',
     gap: 16,
+  },
+  optionBorder: {
+    borderRadius: 16,
+    padding: 1, // This creates the border effect
+  },
+  selectedOptionBorder: {
+    opacity: 1,
   },
   option: {
     padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#fff',
+    borderRadius: 15, // Slightly smaller to fit inside gradient border
+    backgroundColor: '#000',
     alignItems: 'center',
   },
   selectedOption: {
-    backgroundColor: '#000',
+    backgroundColor: 'transparent',
   },
   optionText: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
     fontWeight: '600',
   },
   selectedText: {
     color: '#fff',
   },
   buttons: {
-    flexDirection: 'row',
     gap: 12,
-    marginTop: 32,
   },
   skipButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    paddingVertical: 16,
   },
   skipText: {
     color: '#666',
@@ -213,35 +188,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   nextButton: {
-    flex: 2,
-    padding: 16,
     borderRadius: 16,
-    alignItems: 'center',
-    backgroundColor: '#333',
+    overflow: 'hidden',
+    opacity: 0.5,
   },
   nextButtonActive: {
-    backgroundColor: '#000',
+    opacity: 1,
+  },
+  buttonInner: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   nextButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  notificationContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 32,
-  },
-  imageContainer: {
-    width: 200,
-    height: 200,
-    marginVertical: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  notificationImage: {
-    width: '100%',
-    height: '100%',
   },
 }); 

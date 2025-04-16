@@ -103,11 +103,11 @@ export default function RateProfile() {
       <Text style={styles.sectionTitle}>Your Photos</Text>
       {renderSelectedImages()}
       
-      <Text style={styles.sectionTitle}>About You</Text>
+      <Text style={styles.sectionTitle}>About You (Bio from tinder)</Text>
       <View style={styles.bioContainer}>
         <TextInput
           style={styles.bioInput}
-          placeholder="Write something about yourself..."
+          placeholder="Type here..."
           value={aboutMe}
           onChangeText={setAboutMe}
           multiline
@@ -274,13 +274,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12,
+
   },
   selectedImagesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 24,
+   
   },
   selectedImageWrapper: {
     width: IMAGE_SIZE,
@@ -324,15 +324,14 @@ const styles = StyleSheet.create({
   bioContainer: {
     backgroundColor: '#f8f9fa',
     borderRadius: 16,
+    borderWidth: 1,
     padding: 16,
-    marginBottom: 24,
   },
   bioInput: {
     fontSize: 16,
     color: '#333',
     minHeight: 120,
     textAlignVertical: 'top',
-    marginBottom: 8,
   },
   charCount: {
     fontSize: 12,
@@ -347,7 +346,6 @@ const styles = StyleSheet.create({
   submitButton: {
     borderRadius: 32,
     overflow: 'hidden',
-    marginBottom: 32,
   },
   submitButtonDisabled: {
     opacity: 0.5,

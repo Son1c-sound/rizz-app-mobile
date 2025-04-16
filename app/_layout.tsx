@@ -1,3 +1,4 @@
+import React from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
@@ -7,14 +8,17 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Platform } from 'react-native';
+import { useSuperwall } from '../hooks/useSuperWall';
+import { superwallService } from './services/superwall';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const { isSubscribed } = useSuperwall();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -25,7 +29,12 @@ export default function RootLayout() {
         if (loaded) {
           const completed = await AsyncStorage.getItem('onboardingCompleted');
           await SplashScreen.hideAsync();
+          
           if (completed !== 'true') {
+            router.replace('/onboarding');
+          } else if (!isSubscribed) {
+            // If onboarding is completed but not subscribed, reset and go back to onboarding
+            await AsyncStorage.removeItem('onboardingCompleted');
             router.replace('/onboarding');
           }
         }
@@ -35,7 +44,13 @@ export default function RootLayout() {
     }
 
     prepare();
-  }, [loaded]);
+  }, [loaded, isSubscribed]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      superwallService.initialize();
+    }
+  }, []);
 
   if (!loaded) {
     return null;

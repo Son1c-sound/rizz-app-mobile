@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet, Image, Text, Dimensions } from 'react-native';
+import { View, ScrollView, StyleSheet, Image, Text, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +32,7 @@ export default function HomePage() {
     await deleteFlirt(id);
     await loadSavedFlirts();
   };
+
 
   useEffect(() => {
     loadSavedFlirts();
@@ -128,6 +129,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
+   
   },
   historyContainer: {
     flexDirection: 'row',
@@ -141,7 +143,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: height * 0.7,
-    marginBottom: 23,
   },
   imageWrapper: {
     shadowColor: '#000',
@@ -164,5 +165,18 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  resetButton: {
+    backgroundColor: '#f44336',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
