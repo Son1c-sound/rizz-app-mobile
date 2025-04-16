@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'rizz-app-mobile'
+rootProject.name = 'RIZZUP'
 
 dependencyResolutionManagement {
   versionCatalogs {
