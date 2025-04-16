@@ -6,6 +6,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfilePage() {
+  const handleTerms = () => {
+    Linking.openURL('https://policies-opal.vercel.app/terms');
+  };
+
+  const handlePrivacy = () => {
+    Linking.openURL('https://policies-opal.vercel.app/privacy');
+  };
 
   const socialLinks = [
     { 
@@ -61,14 +68,14 @@ export default function ProfilePage() {
             </View>
 
             <View style={styles.legalButtons}>
-              <TouchableOpacity style={styles.legalButton}>
+              <TouchableOpacity style={styles.legalButton} onPress={handleTerms}>
                 <View style={styles.legalButtonInner}>
                   <Text style={styles.legalButtonText}>Terms of Service</Text>
                   <Ionicons name="chevron-forward" size={20} color="#666" />
                 </View>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.legalButton}>
+              <TouchableOpacity style={styles.legalButton} onPress={handlePrivacy}>
                 <View style={styles.legalButtonInner}>
                   <Text style={styles.legalButtonText}>Privacy Policy</Text>
                   <Ionicons name="chevron-forward" size={20} color="#666" />
