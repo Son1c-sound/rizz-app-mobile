@@ -16,23 +16,12 @@ export default function ProfilePage() {
 
   const socialLinks = [
     { 
-      icon: 'logo-twitter', 
-      url: 'https://twitter.com/rizzapp', 
-      label: 'Twitter',
-      gradient: ['#1DA1F2', '#0D8BD9'] as const
-    },
-    { 
       icon: 'logo-tiktok', 
-      url: 'https://tiktok.com/@rizzapp', 
+      url: 'https://www.tiktok.com/@rizzup29', 
       label: 'TikTok',
       gradient: ['#000000', '#00F2EA'] as const
     },
-    { 
-      icon: 'logo-instagram', 
-      url: 'https://instagram.com/rizzapp', 
-      label: 'Instagram',
-      gradient: ['#833AB4', '#FD1D1D'] as const
-    },
+   
   ];
 
   return (

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "rizz-app-mobile",
+    "name": "RIZZUP",
     "slug": "rizz-app-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.zura346.rizzappmobile",
+      "bundleIdentifier": "com.rizzapmobile.rizzup",
       "requireFullScreen": true,
       "usesIcloudStorage": false,
       "infoPlist": {
