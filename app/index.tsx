@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, Image, Text, Dimensions } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,6 +8,8 @@ import { BottomButtons } from '../components/BottomButtons';
 import { Navbar } from '../components/Navbar';
 import { useCallback, useEffect, useState } from 'react';
 import { SavedFlirt, useFlirtAI } from '../hooks/useFlirtAI';
+
+const { width, height } = Dimensions.get('window');
 
 export default function HomePage() {
   const router = useRouter();
@@ -71,14 +73,32 @@ export default function HomePage() {
     }
   };
 
+  const renderPlaceholder = () => {
+    if (savedFlirts.length > 0) return null;
+
+    return (
+      <View style={styles.placeholderContainer}>
+        <Text style={styles.placeholderText}>Upload a screenshot {'\n'} of a chat</Text>
+        <View style={styles.imageWrapper}>
+          <Image 
+            source={{ uri: 'https://res.cloudinary.com/dzvttwdye/image/upload/v1744753686/jtaycrkzvehchkthyelq.png' }}
+            style={styles.placeholderImage}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+    );
+  };
+
   return (
     <LinearGradient
-      colors={['#f8f9fa', '#e9ecef']}
+      colors={['#ffffff', '#fff8f8']}
       style={styles.wrapper}
     >
       <Navbar />
       <View style={styles.container}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          {renderPlaceholder()}
           <View style={styles.historyContainer}>
             {savedFlirts.map((flirt) => (
               <HistoryImage 
@@ -115,5 +135,34 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginHorizontal: -4,
     marginTop: 8,
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: height * 0.7,
+    marginBottom: 23,
+  },
+  imageWrapper: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  placeholderImage: {
+    width: width * 0.9,
+    height: width * 0.9,
+    marginTop: 20,
+  },
+  placeholderText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });

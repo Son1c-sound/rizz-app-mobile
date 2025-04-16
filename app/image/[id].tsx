@@ -211,18 +211,20 @@ export default function ImageDetail() {
 
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={[styles.generateButton, {
-            backgroundColor: CATEGORY_COLORS[selectedCategory].active
-          }]}
+          style={[styles.generateButton]}
           onPress={() => handleGenerateFlirt()}
           disabled={isLoading}
         >
-          <View style={styles.buttonInner}>
-            <Ionicons name="refresh" size={24} color="#fff" style={styles.buttonIcon} />
+          <LinearGradient
+            colors={['#FF4D43', '#FF2D55']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.buttonInner}
+          >
             <Text style={styles.buttonText}>
-              {isLoading ? 'Generating...' : `Generate ${selectedCategory} Line`}
+              {isLoading ? 'Generating...' : `Get ${selectedCategory} Line 🔥`}
             </Text>
-          </View>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -331,6 +333,7 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     borderRadius: 24,
+    overflow: 'hidden',
   },
   buttonInner: {
     flexDirection: 'row',
@@ -341,6 +344,10 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginRight: 8,
+  },
+  gradientText: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
   buttonText: {
     color: '#fff',

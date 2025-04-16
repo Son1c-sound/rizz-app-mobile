@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import { Link } from 'expo-router';
 import { GestureResponderEvent } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export const HISTORY_IMAGES = [
   {
@@ -55,7 +56,7 @@ export function HistoryImage({ id, url, onDelete }: HistoryImageProps) {
             style={styles.deleteButton} 
             onPress={handleDelete}
           >
-            <Text style={styles.deleteX}>✕</Text>
+            <Ionicons name="close" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -88,16 +89,9 @@ const styles = StyleSheet.create({
     right: 8,
     width: 24,
     height: 24,
+    backgroundColor: '#000',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  deleteX: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 14,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
 }); 

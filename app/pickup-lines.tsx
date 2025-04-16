@@ -4,6 +4,7 @@ import { Navbar } from '../components/Navbar';
 import { pickupLines } from '../data/pickupLines';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Category = 'standard' | 'spicy' | 'playful';
 
@@ -124,15 +125,17 @@ export default function PickupLinesPage() {
 
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={[styles.generateButton, {
-            backgroundColor: CATEGORY_COLORS[selectedCategory].active
-          }]}
+          style={styles.generateButton}
           onPress={getRandomPickupLine}
         >
-          <View style={styles.buttonInner}>
-            <Ionicons name="refresh" size={24} color="#fff" style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Generate {selectedCategory} Line</Text>
-          </View>
+          <LinearGradient
+            colors={['#FF4D43', '#FF2D55']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.buttonInner}
+          >
+            <Text style={styles.buttonText}>Get {selectedCategory} Line 🎯</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -211,17 +214,14 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
   },
   generateButton: {
-    borderRadius: 24,
+    borderRadius: 32,
+    overflow: 'hidden',
   },
   buttonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
-    gap: 8,
-  },
-  buttonIcon: {
-    marginRight: 8,
   },
   buttonText: {
     color: '#fff',

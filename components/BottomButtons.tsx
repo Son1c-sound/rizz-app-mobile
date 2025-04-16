@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 const isSmallScreen = width < 375;
@@ -14,9 +14,14 @@ export function BottomButtons({ onUpload }: BottomButtonsProps) {
   return (
     <View style={styles.bottomButtons}>
       <TouchableOpacity style={styles.uploadButton} onPress={onUpload}>
-        <View style={styles.uploadButtonInner}>
+        <LinearGradient
+          colors={['#FF4D43', '#FF2D55']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.uploadButtonInner}
+        >
           <Text style={styles.uploadButtonText}>Upload a Screenshot</Text>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
       <View style={styles.bottomRow}>
         <Link href="/rate-profile" asChild>
@@ -58,20 +63,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   whiteButtonInner: {
-    padding: isSmallScreen ? 8 : 10,
+    padding: isSmallScreen ? 6 : 8,
     alignItems: 'center',
   },
   whiteButtonText: {
-    color: '#333',
-    fontSize: isSmallScreen ? 13 : 15,
+    color: '#000',
+    fontSize: isSmallScreen ? 12 : 14,
     fontWeight: '600',
     textAlign: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   uploadButton: {
     borderRadius: 32,
     overflow: 'hidden',
     height: 56,
-    backgroundColor: '#000',
   },
   uploadButtonInner: {
     flex: 1,
@@ -83,5 +89,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     color: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  gradientButton: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  gradientButtonInner: {
+    padding: isSmallScreen ? 6 : 8,
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  gradientButtonText: {
+    color: '#fff',
+    fontSize: isSmallScreen ? 12 : 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingHorizontal: 12,
   },
 }); 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -50,9 +50,14 @@ export function Navbar() {
           style={styles.iconButton}
           onPress={() => router.push('/profile')}
         >
-          <View style={styles.profileButton}>
-            <Ionicons name="person-outline" size={24} color="#fff" />
-          </View>
+          <LinearGradient
+            colors={['#ffffff', '#ffffff']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.profileButton}
+          >
+            <Ionicons name="person-outline" size={24} color="#000" />
+          </LinearGradient>
         </TouchableOpacity>
       );
     }
@@ -71,42 +76,34 @@ export function Navbar() {
 
   return (
     <View style={[
-      styles.wrapper,
+      styles.container,
       { 
         paddingTop: Platform.OS === 'ios' ? insets.top : insets.top + 8,
         backgroundColor: 'transparent'
       }
     ]}>
-      <View style={styles.container}>
+      <View style={styles.innerContainer}>
         {renderLeftButton()}
         
-        <MaskedView
-          style={[styles.titleContainer, { backgroundColor: 'transparent' }]}
-          maskElement={
-            <View style={styles.titleMaskContainer}>
-              <Text style={styles.titleMask}>RizzApp</Text>
-            </View>
-          }
-        >
-          <LinearGradient
-            colors={['#FF69B4', '#FFB6C1']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.titleGradient}
+        <View style={styles.titleContainer}>
+          <Image 
+            source={{ uri: 'https://res.cloudinary.com/dzvttwdye/image/upload/v1744763523/txc2gjzyehvpkzvnbkiy.webp' }}
+            style={styles.logoImage}
+            resizeMode="contain"
           />
-        </MaskedView>
+        </View>
 
         <TouchableOpacity 
           style={[styles.iconButton, { backgroundColor: 'transparent' }]}
           onPress={handleImageUpload}
         >
           <LinearGradient
-            colors={['#FF69B4', '#FFB6C1']}
+            colors={['#ffffff', '#ffffff']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.plusButton}
           >
-            <Ionicons name="add" size={28} color="#fff" />
+            <Ionicons name="add" size={28} color="#000" />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -115,17 +112,16 @@ export function Navbar() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     backgroundColor: 'transparent',
   },
-  container: {
+  innerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     minHeight: 60,
-    backgroundColor: 'transparent',
   },
   iconButton: {
     width: 44,
@@ -136,7 +132,6 @@ const styles = StyleSheet.create({
   profileButton: {
     width: 40,
     height: 40,
-    backgroundColor: '#000',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -160,33 +155,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  titleMaskContainer: {
-    backgroundColor: 'transparent',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImage: {
+    width: 120,
+    height: 40,
   },
-  titleMask: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textShadowColor: '#000',
-    textShadowOffset: { width: -1, height: -1 },
-    textShadowRadius: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 1, height: 1 },
-        shadowOpacity: 1,
-        shadowRadius: 1,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
-  },
-  titleGradient: {
-    flex: 1,
-    width: '100%',
+  buttonShadow: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 }); 

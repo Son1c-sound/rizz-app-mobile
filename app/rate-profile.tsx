@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Image,
   TextInput,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Progress from 'react-native-progress';
@@ -15,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Navbar } from '../components/Navbar';
 import { useProfileRating, ProfileRatingResponse } from '../hooks/useProfileRating';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const IMAGE_SIZE = (width - 48) / 2;
@@ -49,19 +51,30 @@ export default function RateProfile() {
     <TouchableOpacity
       style={styles.imagePicker}
       onPress={pickImage}
-      disabled={selectedImages.length >= 4}
+      disabled={selectedImages.length >= 6}
     >
-      <Ionicons name="add-circle-outline" size={32} color="#666" />
-      <Text style={styles.imagePickerText}>
-        Add Photo ({selectedImages.length}/4)
-      </Text>
+      <LinearGradient
+        colors={['#FF4D43', '#FF2D55']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.imagePickerGradient}
+      >
+        <Ionicons name="add-circle-outline" size={32} color="#fff" />
+        <Text style={[styles.imagePickerText, { color: '#fff' }]}>
+          Add Photos ({selectedImages.length}/6)
+        </Text>
+      </LinearGradient>
     </TouchableOpacity>
   );
 
   const renderSelectedImages = () => (
     <View style={styles.selectedImagesContainer}>
       {selectedImages.map((image, index) => (
-        <View key={index} style={styles.selectedImageWrapper}>
+        <Animated.View 
+          key={index} 
+          entering={FadeInUp.delay(index * 100)}
+          style={styles.selectedImageWrapper}
+        >
           <Image
             source={{ uri: `data:image/jpeg;base64,${image}` }}
             style={styles.selectedImage}
@@ -71,29 +84,40 @@ export default function RateProfile() {
               style={styles.removeImageButton}
               onPress={() => removeImage(index)}
             >
-              <Ionicons name="close-circle" size={24} color="#fff" />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.7)']}
+                style={styles.removeImageGradient}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
+              </LinearGradient>
             </TouchableOpacity>
           )}
-        </View>
+        </Animated.View>
       ))}
-      {!savedRating && selectedImages.length < 4 && renderImagePicker()}
+      {!savedRating && selectedImages.length < 6 && renderImagePicker()}
     </View>
   );
 
   const renderAnalysisForm = () => (
-    <>
+    <Animated.View entering={FadeIn} style={styles.formContainer}>
+      <Text style={styles.sectionTitle}>Your Photos</Text>
       {renderSelectedImages()}
       
-      <TextInput
-        style={styles.bioInput}
-        placeholder="Write something about yourself..."
-        value={aboutMe}
-        onChangeText={setAboutMe}
-        multiline
-        numberOfLines={4}
-        maxLength={500}
-        editable={!savedRating}
-      />
+      <Text style={styles.sectionTitle}>About You</Text>
+      <View style={styles.bioContainer}>
+        <TextInput
+          style={styles.bioInput}
+          placeholder="Write something about yourself..."
+          value={aboutMe}
+          onChangeText={setAboutMe}
+          multiline
+          numberOfLines={4}
+          maxLength={500}
+          editable={!savedRating}
+          placeholderTextColor="#999"
+        />
+        <Text style={styles.charCount}>{aboutMe.length}/500</Text>
+      </View>
       
       {error && (
         <Text style={styles.errorText}>{error}</Text>
@@ -107,85 +131,103 @@ export default function RateProfile() {
         onPress={handleSubmit}
         disabled={isLoading || selectedImages.length === 0 || !aboutMe}
       >
-        <Text style={styles.submitButtonText}>
-          {isLoading ? 'Analyzing...' : 'Analyze My Profile'}
-        </Text>
+        <LinearGradient
+          colors={['#FF4D43', '#FF2D55']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.submitButtonInner}
+        >
+          <Text style={styles.submitButtonText}>
+            {isLoading ? 'Analyzing...' : 'Rate My Profile'}
+          </Text>
+        </LinearGradient>
       </TouchableOpacity>
-    </>
+    </Animated.View>
   );
 
   const renderRatingResult = (result: ProfileRatingResponse) => (
-    <View style={styles.resultContainer}>
-      <Text style={styles.headerText}>{result.headerText}</Text>
-
-      <View style={styles.progressContainer}>
+    <Animated.View entering={FadeIn} style={styles.resultContainer}>
+      <View style={styles.scoreCard}>
+        <Text style={styles.scoreTitle}>Profile Score</Text>
         <Progress.Circle
-          size={200}
+          size={160}
           progress={result.profileRating / 100}
           thickness={15}
-          color="#FF69B4"
-          unfilledColor="#FFE5EE"
+          color="#FF4D43"
+          unfilledColor="#FFE5E3"
           borderWidth={0}
           strokeCap="round"
           showsText
           formatText={() => `${Math.round(result.profileRating)}`}
-          textStyle={styles.progressText}
+          textStyle={{ fontSize: 48, fontWeight: '800', color: '#FF4D43' }}
         />
-        <View style={styles.ratingLabelContainer}>
-          <Text style={styles.ratingValue}>out of 100</Text>
-          <Text style={styles.ratingLabel}>Profile Rating</Text>
+        <View style={styles.scoreDetails}>
+          <Text style={styles.scoreSubtitle}>{result.headerText}</Text>
         </View>
       </View>
-      
+
+      <View style={styles.miniImagesContainer}>
+        {selectedImages.map((image, index) => (
+          <Image
+            key={index}
+            source={{ uri: `data:image/jpeg;base64,${image}` }}
+            style={styles.miniImage}
+          />
+        ))}
+      </View>
+
       <View style={styles.tipsSection}>
-        <Text style={styles.tipsHeader}>How to fix your L's</Text>
-
+        <Text style={styles.tipsTitle}>How to fix your L's</Text>
         <View style={styles.tipsContainer}>
-          <View style={styles.tipCard}>
-            <View style={[styles.tipIcon, { backgroundColor: '#EDF5FF' }]}>
-              <Ionicons name="camera" size={24} color="#4A90E2" />
-            </View>
-            <Text style={styles.tipText}>{result.tip1}</Text>
-          </View>
-          
-          <View style={styles.tipCard}>
-            <View style={[styles.tipIcon, { backgroundColor: '#F8E7FB' }]}>
-              <Ionicons name="create" size={24} color="#9C27B0" />
-            </View>
-            <Text style={styles.tipText}>{result.tip2}</Text>
-          </View>
-          
-          <View style={styles.tipCard}>
-            <View style={[styles.tipIcon, { backgroundColor: '#FFEBEE' }]}>
-              <Ionicons name="star" size={24} color="#E53935" />
-            </View>
-            <Text style={styles.tipText}>{result.tip3}</Text>
-          </View>
+          {[result.tip1, result.tip2, result.tip3].map((tip, index) => (
+            <Animated.View 
+              key={index}
+              entering={FadeInUp.delay(index * 200)}
+              style={styles.tipCard}
+            >
+              <Text style={styles.tipNumber}>{index + 1})</Text>
+              <Text style={styles.tipText}>{tip}</Text>
+            </Animated.View>
+          ))}
         </View>
       </View>
-
-      <View style={styles.bottomSpacing} />
-    </View>
+    </Animated.View>
   );
+
+  const getTipColor = (index: number) => {
+    const colors = [
+      { bg: '#EDF5FF', icon: '#4A90E2' },
+      { bg: '#E6F0FF', icon: '#2B6CB0' },
+      { bg: '#EBF4FF', icon: '#3182CE' },
+    ];
+    return colors[index];
+  };
+
+  const getTipIcon = (index: number) => {
+    const icons = ['camera', 'create', 'star'];
+    return icons[index] as keyof typeof Ionicons.glyphMap;
+  };
+
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (savedRating) {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  }, [savedRating]);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Navbar />
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Rate My Tinder Profile</Text>
-        
-        {savedRating ? (
-          <>
-            {renderSelectedImages()}
-            {renderRatingResult(savedRating.result)}
-          </>
-        ) : (
-          renderAnalysisForm()
-        )}
+        {!savedRating && <Text style={styles.title}>Rate My Profile</Text>}
+        {savedRating ? renderRatingResult(savedRating.result) : renderAnalysisForm()}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
 
       {savedRating && (
@@ -194,7 +236,14 @@ export default function RateProfile() {
             style={styles.resetButton}
             onPress={handleReset}
           >
-            <Text style={styles.resetButtonText}>Analyze Again</Text>
+            <LinearGradient
+              colors={['#FF4D43', '#FF2D55']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.resetButtonInner}
+            >
+              <Text style={styles.resetButtonText}>Rate Again</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       )}
@@ -205,7 +254,6 @@ export default function RateProfile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   scrollView: {
     flex: 1,
@@ -214,22 +262,32 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     marginBottom: 24,
     color: '#333',
   },
+  formContainer: {
+    gap: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
   selectedImagesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 12,
     marginBottom: 24,
   },
   selectedImageWrapper: {
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: '#fff',
   },
   selectedImage: {
     width: '100%',
@@ -239,33 +297,47 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 12,
+  },
+  removeImageGradient: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   imagePicker: {
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderStyle: 'dashed',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  imagePickerGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   imagePickerText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#666',
+    fontWeight: '600',
+  },
+  bioContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
   },
   bioInput: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    minHeight: 120,
-    marginBottom: 24,
     fontSize: 16,
+    color: '#333',
+    minHeight: 120,
     textAlignVertical: 'top',
+    marginBottom: 8,
+  },
+  charCount: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'right',
   },
   errorText: {
     color: '#E53935',
@@ -273,72 +345,78 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: '#000',
     borderRadius: 32,
-    padding: 16,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginBottom: 32,
   },
   submitButtonDisabled: {
     opacity: 0.5,
   },
+  submitButtonInner: {
+    padding: 16,
+    alignItems: 'center',
+  },
   submitButtonText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    color: '#fff',
   },
   resultContainer: {
-    alignItems: 'center',
     gap: 32,
-    paddingTop: 16,
+  },
+  scoreCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
     width: '100%',
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-    paddingHorizontal: 16,
-    lineHeight: 28,
-  },
-  progressContainer: {
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  progressText: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: '#333',
-  },
-  ratingLabelContainer: {
+  scoreDetails: {
     alignItems: 'center',
     marginTop: 16,
   },
-  ratingValue: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 4,
+  miniImagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+    marginTop: 16,
+    marginBottom: 32,
+    paddingHorizontal: 16,
   },
-  ratingLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+  miniImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
   },
-  tipsSection: {
-    width: '100%',
-    gap: 16,
-    marginTop: 8,
+  progressText: {
+    fontSize: 48,
+    fontWeight: '800',
   },
-  tipsHeader: {
-    fontSize: 20,
+  scoreTitle: {
+    fontSize: 24,
     fontWeight: '700',
     color: '#333',
     marginBottom: 16,
-    alignSelf: 'flex-start',
+    textAlign: 'center',
+  },
+  scoreSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  tipsSection: {
+    gap: 16,
+  },
+  tipsTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#333',
+    marginBottom: 16,
   },
   tipsContainer: {
-    gap: 16,
-    width: '100%',
+    gap: 8,
   },
   tipCard: {
     backgroundColor: '#fff',
@@ -346,17 +424,12 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
-    width: '100%',
+    gap: 12,
   },
-  tipIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+  tipNumber: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF4D43',
   },
   tipText: {
     flex: 1,
@@ -373,20 +446,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   resetButton: {
-    backgroundColor: '#fff',
     borderRadius: 32,
+    overflow: 'hidden',
+  },
+  resetButtonInner: {
     padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    width: '100%',
   },
   resetButtonText: {
-    color: '#333',
     fontSize: 18,
     fontWeight: '600',
+    color: '#fff',
   },
   bottomSpacing: {
-    height: 150,
+    height: 80,
   },
 }); 
