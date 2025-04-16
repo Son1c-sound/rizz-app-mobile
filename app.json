@@ -19,7 +19,8 @@
         "UISupportsDocumentBrowser": false,
         "WKWebViewConfiguration": {
           "allowsInlineMediaPlayback": true
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -29,8 +30,9 @@
       },
       "package": "com.zura346.rizzappmobile",
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -58,6 +60,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4f60ba12-4bc4-420a-a988-728d420e50b9"
+      }
     }
   }
 }

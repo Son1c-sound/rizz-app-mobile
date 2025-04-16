@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   bottomButtons: {
     padding: 16,
     gap: 12,
+    marginBottom: 15,
   },
   bottomRow: {
     flexDirection: 'row',

@@ -333,6 +333,8 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     borderRadius: 24,
+
+    marginBottom: 20,
     overflow: 'hidden',
   },
   buttonInner: {

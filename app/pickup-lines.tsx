@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     padding: 16,
-    borderTopWidth: 1,
+      
     borderTopColor: '#eee',
   },
   generateButton: {

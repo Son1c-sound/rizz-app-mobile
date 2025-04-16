@@ -446,6 +446,7 @@ const styles = StyleSheet.create({
   resetButton: {
     borderRadius: 32,
     overflow: 'hidden',
+    marginBottom: 20,
   },
   resetButtonInner: {
     padding: 16,
@@ -453,6 +454,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 18,
+  
     fontWeight: '600',
     color: '#fff',
   },

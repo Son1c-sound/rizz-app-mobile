@@ -40,7 +40,7 @@ export default function OnboardingPage() {
       
       await showPaywall(SUPERWALL_TRIGGERS.FEATURE_UNLOCK);
       
-      if (isSubscribed) {
+      if (!isSubscribed) {
         await AsyncStorage.setItem('onboardingCompleted', 'true');
         router.replace('/');
       }
