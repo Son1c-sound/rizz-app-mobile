@@ -33,7 +33,6 @@ export default function RootLayout() {
           if (completed !== 'true') {
             router.replace('/onboarding');
           } else if (!isSubscribed) {
-            // If onboarding is completed but not subscribed, reset and go back to onboarding
             await AsyncStorage.removeItem('onboardingCompleted');
             router.replace('/onboarding');
           }

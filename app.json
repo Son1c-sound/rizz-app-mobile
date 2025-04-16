@@ -9,14 +9,29 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.zura346.rizzappmobile",
+      "requireFullScreen": true,
+      "usesIcloudStorage": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload chat screenshots for analysis.",
+        "UIStatusBarStyle": "UIStatusBarStyleDarkContent",
+        "UISupportsDocumentBrowser": false,
+        "WKWebViewConfiguration": {
+          "allowsInlineMediaPlayback": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.zura346.rizzappmobile"
+      "package": "com.zura346.rizzappmobile",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -32,6 +47,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "RizzUP needs access to your photos to analyze chat screenshots and provide personalized suggestions."
         }
       ]
     ],
