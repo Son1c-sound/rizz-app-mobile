@@ -40,7 +40,7 @@ export default function OnboardingPage() {
       
       await showPaywall(SUPERWALL_TRIGGERS.FEATURE_UNLOCK);
       
-      if (!isSubscribed) {
+      if (isSubscribed) {
         await AsyncStorage.setItem('onboardingCompleted', 'true');
         router.replace('/');
       }
@@ -89,6 +89,15 @@ export default function OnboardingPage() {
                 </View>
               </LinearGradient>
             </TouchableOpacity>
+            {__DEV__ && (
+  <TouchableOpacity
+    style={{ marginTop: 20, alignItems: 'center', padding: 10 }}
+    onPress={() => showPaywall(SUPERWALL_TRIGGERS.FEATURE_UNLOCK)}
+  >
+    <Text style={{ color: 'lime', fontWeight: 'bold' }}>[DEBUG] Show Paywall</Text>
+  </TouchableOpacity>
+)}
+
           </View>
         </View>
 

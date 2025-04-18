@@ -123,7 +123,7 @@ export function useProfileRating() {
 
       const data = await response.json();
       
-      // Save to AsyncStorage
+ 
       const saveData: SavedProfileRating = {
         images: selectedImages,
         aboutMe,
